@@ -18,7 +18,48 @@ station wlan0 connect SSID
    emacs README.org
    #+end_src
 
-** Партиции
+** Партиции 1
+
+   https://wiki.archlinux.org/index.php/Dm-crypt/Encrypting_an_entire_system#LVM_on_LUKS
+
+   #+begin_quote
+   The straightforward method is to set up LVM on top of the encrypted partition instead of the other way round. Technically the LVM is setup inside one big encrypted blockdevice. Hence, the LVM is not transparent until the blockdevice is unlocked and the underlying volume structure is scanned and mounted during boot.
+
+   The disk layout in this example is:
+   #+end_quote
+
+   #+begin_example
++-----------------------------------------------------------------------+ +----------------+
+| Logical volume 1      | Logical volume 2      | Logical volume 3      | | Boot partition |
+|                       |                       |                       | |                |
+| [SWAP]                | /                     | /home                 | | /boot          |
+|                       |                       |                       | |                |
+| /dev/MyVolGroup/swap  | /dev/MyVolGroup/root  | /dev/MyVolGroup/home  | |                |
+|_ _ _ _ _ _ _ _ _ _ _ _|_ _ _ _ _ _ _ _ _ _ _ _|_ _ _ _ _ _ _ _ _ _ _ _| | (may be on     |
+|                                                                       | | other device)  |
+|                         LUKS2 encrypted partition                     | |                |
+|                           /dev/sda1                                   | | /dev/sdb1      |
++-----------------------------------------------------------------------+ +----------------+
+  #+end_example
+   
+  Соответственно, нужно две партиции, одна под ~/boot~ и одна под ~LUKS~ со всем остальным.
+
+  Переводим в ~GPT~, создаём партиции (секторы взяты, так сказать, эмпирически)
+
+  ~ef00~ это ~efi~ партиция.
+
+  Для второй партиции end sector 0 означает "последний какой только можно"
+
+   #+begin_src 
+   sgdisk -g /dev/nvme0n1
+   sgdisk -n 1:2048:555007 -t 1:ef00 /dev/nvme0n1
+   sgdisk -n 2:555008:0 -t 2:8300 /dev/nvme0n1
+   #+end_src
+
+** LUKS
+
+
+** Партиции 2
 
 ** Пакеты
 
