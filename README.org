@@ -7,8 +7,72 @@ https://grahamc.com/blog/erase-your-darlings
 iwctl
 station wlan0 scan
 station wlan0 connect SSID
-wget 
 #+end_src
 
-** Партиционирование
+** Мусорка
+   #+begin_src sh
+   mkdir prep
+   mkdir mn
+   cd prep
+   wget https://raw.githubusercontent.com/Hoodoo/archlinux_setup/master/README.org
+   emacs README.org
+   #+end_src
+
+** Партиции
+
+** Пакеты
+
+** Чрут
+
+** Время
+
+** Локали
+
+** /etc/hostname
+
+** initramfs
+
+** root
+
+** grub
+   
+   На этой машине при каждой переналивке будут создаваться логические тома с одинаковыми названиями, ~UUID~ криптоконтейнера может измениться.
+
+   #+begin_src sh
+   UUID=`blkid /dev/nvme0n1p2 | grep -ow 'UUID="[a-f0-9\-]*"' | sed 's?"??g'`
+   LINUM=`grep -n GRUB_CMDLINE_LINUX= /etc/default/grub | cut -d ":" -f 1`
+   HEAD=`head -$((${LINUM} - 1)) /etc/default/grub`
+   LENGTH=`wc -l /etc/default/grub | awk '{ print $1 }'`
+   TAIL=`tail -$((${LENGTH} - ${LINUM})) /etc/default/grub`
+   CMDLINE='GRUB_CMDLINE_LINUX="resume=/dev/arch/swap cryptdevice='
+   CMDLINE+=${UUID}
+   CMDLINE+=':crytplvm root=/dev/arch/root"'
+   echo "${HEAD}" > prep/grub
+   echo "${CMDLINE}" >> prep/grub
+   echo "${TAIL}" >> prep/grub
+   #+end_src
+
+** crypttab
+
+   #+begin_src sh
+   UUID=`blkid /dev/nvme0n1p2 | grep -ow 'UUID="[a-f0-9\-]*"' | sed 's?"??g'`; echo "cryptlvm ${UUID}" > prep/crypttab
+   #+end_src
+
+** юзер
+
+** AUR
+
+** Тачпад
+
+** Видеодрайвер
+
+** WM
+
+** rofi
+
+** Терминал
+
+** Секреты
+
+** 
 
