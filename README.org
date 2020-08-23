@@ -99,7 +99,6 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
    mkfs.fat -F32 /dev/nvme0n1p1
    #+end_src
 
-
 ** Монтируем корень
    
    #+begin_src 
@@ -246,6 +245,9 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
    mkdir /home/hoodoo/.emacs.d/
    cp configs/init.el /home/hoodoo/emacs.d/
    #+end_src
+
+   Обоина: https://pixabay.com/users/barbaraalane-756613/
+   Лицензия на обоину: https://pixabay.com/service/license/
 
 ** Сервисы
 
