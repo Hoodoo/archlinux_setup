@@ -6,10 +6,11 @@ no_create_root	1
 retain	daily	10
 verbose		3
 logfile		/var/log/rsnapshot.work.log
-backup		/home/hoodoo/Org	.
+backup		/home/hoodoo/Org		.
 backup		/home/hoodoo/archlinux_setup	.
-backup		/home/hoodoo/puppet	.
-backup		/home/hoodoo/.ssh	.
+backup		/home/hoodoo/puppet		.
+backup		/home/hoodoo/wallpapers		.
+backup		/home/hoodoo/.ssh		.
 backup		/home/hoodoo/.password-store	.
-backup		/home/hoodoo/.gnupg	.
+backup		/home/hoodoo/.gnupg		.
 backup		/home/hoodoo/.bash_history	.

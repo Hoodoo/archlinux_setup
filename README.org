@@ -43,7 +43,7 @@ station wlan0 connect SSID
 |                           /dev/sda1                                   | | /dev/sdb1      |
 +-----------------------------------------------------------------------+ +----------------+
   #+end_example
-   
+
   Соответственно, нужно две партиции, одна под ~/boot~ и одна под ~LUKS~ со всем остальным.
 
 luks  Переводим в ~GPT~, создаём партиции (секторы взяты, так сказать, эмпирически)
@@ -52,7 +52,7 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
 
   Для второй партиции end sector 0 означает "последний какой только можно"
 
-   #+begin_src 
+   #+begin_src
    sgdisk -g /dev/nvme0n1
    sgdisk -n 1:2048:555007 -t 1:ef00 /dev/nvme0n1
    sgdisk -n 2:555008:0 -t 2:8300 /dev/nvme0n1
@@ -62,7 +62,7 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
 
    Как и было сказано, используем ~LVM~ on ~LUKS~, партиции созданы, теперь сетапим шифрованный раздел. Есть ограничение: стандартный ~ecrypt~ хук не позволит создать группу томов на нескольких устройствах, но это не используется на ноутбуке.
 
-   #+begin_src 
+   #+begin_src
    cryptsetup luksFormat /dev/nvme0n1p2
    cryptsetup open /dev/nvme0n1p2 cryptlvm
    #+end_src
@@ -71,7 +71,7 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
 
    На зашифрованной партиции создадим логические тома под корень, домашнюю директорию и своп.
 
-   #+begin_src 
+   #+begin_src
    pvcreate /dev/mapper/cryptlvm
    vgcreate arch /dev/mapper/cryptlvm
    lvcreate -L 32G arch -n swap
@@ -89,7 +89,7 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
 
    И форматируем /boot
 
-   #+begin_src 
+   #+begin_src
    mkfs.fat -F32 /dev/nvme0n1p1
    #+end_src
 
@@ -104,37 +104,13 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
    #+end_src
 
    Установим сразу всё, что можно установить не из ~AUR~: в любом случае нужно будет перед чрутом установить несколько пакетов для поддержки ~LUKS~ и ~LVM~.
+(require 'org-tempo)
 
-    6  pacman -S vi
-   13  pacman -S lvm2
-   14  pacman -S cryptsetup
-   25  pacman -S iwd emacs
-   26  pacman -S  man-db man-pages texinfo
-   29  pacman -S grub efibootmgr
-   92  pacman -S sudo
-  124  pacman -S networkmanager
-  125  pacman -S dhclient bluez modemmanager
-  136  pacman -S sudo
-   67  sudo pacman -S mesa lib32-mesa xf86-video-intel
-   76  sudo pacman -S mesa xf86-video-intel
-   91  sudo pacman -S xorg-server
-  103  sudo pacman -S xf86-input-devices
-  104  sudo pacman -S xf86-input-libinput
-  109  sudo pacman -S xorg-init
-  110  sudo pacman -S xorg-xinit
-  112  sudo pacman -S firefox openconnect
-  113  sudo pacman -S firefox openconnect git
-  114  sudo pacman -S firefox openconnect rofi
-  164  sudo pacman -S kitty
-  173  sudo pacman -S rofi-pass
-  189  sudo pacman -S scrot
-  203  sudo pacman -S wget
-  225  sudo pacman -S dnsutils
-  258  sudo pacman -S qtpass
-  312  sudo pacman -S community/the_silver_searcher
-  399  sudo pacman -S python
-  405  sudo pacman -S python-pip
-  476  sudo pacman -S udisks2 udiskie
+#+begin_src
+# Базовая система
+pacstrap base linux linux-firmware man-db man-pages texinfo grub efibootmgr dhclient bluez modemmanager sudo networkmanager mesa xf86-video-intel xorg-server xf86-input-devices xorg-xinit xf86-input-libinput openconnect git lvm2 cryptsetup sudo emacs rofi rofi-pass maim wget dnsutils qtpass community/the_silver_searcher python python-pip udisks2 udiskie
+
+#+end_src
 
 ** Чрут
 
@@ -149,7 +125,7 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
 ** root
 
 ** grub
-   
+
    На этой машине при каждой переналивке будут создаваться логические тома с одинаковыми названиями, ~UUID~ криптоконтейнера может измениться.
 
    #+begin_src sh
@@ -187,7 +163,7 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
    - passwordstore
    - ssh
    - gnupg
- 
+
 ** rofi
 
 ** Терминал
@@ -198,17 +174,17 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
    Поскольку график сейчас не очень стабильный, наверное, нельзя расчитывать на автомонтирование устройств для бэкапа.
 
    Идея следующая: нужно использовать ~rsnapshot~ и написать скрпит:
-   - 
+   -
 
 
    'Домашний' том:
    /run/media/hoodoo/58b8a66d-a305-456a-9a26-ab9bfef6d95b
-   
+
    'Рабочий' том:
    /run/media/hoodoo/e542ac74-2ecf-45d7-97bd-99e0fb5f6182
 
 ** Оповещения
-   
+
    #+begin_src shell
     6  pacman -S vi
    13  pacman -S lvm2
@@ -286,10 +262,9 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
   438  yay -S picom nitrogen berry-git
   444  yay -S picom nitrogen berry-git
   447  yay -S picom nitrogen berry-git
-  460  yay -S picom nitrogen 
+  460  yay -S picom nitrogen
   475  sudo pacman -S udisks udiskie
   476  sudo pacman -S udisks2 udiskie
   #+end_src
 
-pacman -S --needed base-develdf -h 
-
+pacman -S --needed base-develdf -h
