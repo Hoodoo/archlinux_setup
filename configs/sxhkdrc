@@ -1,0 +1,23 @@
+super + F12
+  pkill -USR1 -x sxhkd
+super + shift + Return 
+	termite
+super + p
+	rofi -show run
+super + x
+	xkill
+super + e
+      	emacsclient -c
+control + backslash
+      	~/.local/bin/kbswitch.sh
+super  + equal
+      rofi -modi "clipboard:greenclip print" -show clipboard -run-command '{cmd}'
+
+shift + super + p
+      rofi-pass
+
+control + super + l
+      xscreensaver-command -lock
+
+super + BackSpace
+      kill -s USR1 $(pidof deadd-notification-center)
