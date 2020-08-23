@@ -121,7 +121,6 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
    #+end_src
 
    Установим сразу всё, что можно установить не из ~AUR~: в любом случае нужно будет перед чрутом установить несколько пакетов для поддержки ~LUKS~ и ~LVM~.
-(require 'org-tempo)
 
    #+begin_src sh
    pacstrap base linux linux-firmware man-db man-pages texinfo grub efibootmgr dhclient bluez modemmanager sudo networkmanager mesa xf86-video-intel xorg-server xf86-input-devices xorg-xinit xf86-input-libinput openconnect git lvm2 cryptsetup sudo emacs rofi rofi-pass maim wget dnsutils qtpass community/the_silver_searcher python python-pip udisks2 udiskie
@@ -244,6 +243,8 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
    mkdir -p /home/hoodoo/.config/{termite,sxhkd}
    cp configs/sxhkdrc /home/hoodoo/.config/sxhkd/
    cp configs/termite_slash_config /home/termite/config
+   mkdir /home/hoodoo/.emacs.d/
+   cp configs/init.el /home/hoodoo/emacs.d/
    #+end_src
 
 ** Сервисы
@@ -251,6 +252,20 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
    #+begin_src 
    sudo systemctl enable NetworkManager
    sudo systemctl enable pcscd
+   #+end_src
+
+** Первый логин
+
+   Перед первым логином нужно, чтобы емакс забутстрапил все пакеты, соответственно
+
+   #+begin_src 
+   emacs
+   #+end_src
+
+   После этого можно стартовать иксы
+
+   #+begin_src 
+   startx
    #+end_src
 
 ** Секреты
