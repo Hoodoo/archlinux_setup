@@ -3,6 +3,8 @@ https://grahamc.com/blog/erase-your-darlings
 
 По идее, достаточно где-то опубликовать этот файл, в инсталлере запускать ~tmux~ и ~emacs~ и накатывать по инструкции. Единственные вещи, которые нужно будет запомнить:
 
+Файл расчитан на ThinkPad T480.
+
 #+begin_src sh
 iwctl
 station wlan0 scan
@@ -44,7 +46,7 @@ station wlan0 connect SSID
    
   Соответственно, нужно две партиции, одна под ~/boot~ и одна под ~LUKS~ со всем остальным.
 
-  Переводим в ~GPT~, создаём партиции (секторы взяты, так сказать, эмпирически)
+luks  Переводим в ~GPT~, создаём партиции (секторы взяты, так сказать, эмпирически)
 
   ~ef00~ это ~efi~ партиция.
 
@@ -58,10 +60,81 @@ station wlan0 connect SSID
 
 ** LUKS
 
+   Как и было сказано, используем ~LVM~ on ~LUKS~, партиции созданы, теперь сетапим шифрованный раздел. Есть ограничение: стандартный ~ecrypt~ хук не позволит создать группу томов на нескольких устройствах, но это не используется на ноутбуке.
+
+   #+begin_src 
+   cryptsetup luksFormat /dev/nvme0n1p2
+   cryptsetup open /dev/nvme0n1p2 cryptlvm
+   #+end_src
 
 ** Партиции 2
 
-** Пакеты
+   На зашифрованной партиции создадим логические тома под корень, домашнюю директорию и своп.
+
+   #+begin_src 
+   pvcreate /dev/mapper/cryptlvm
+   vgcreate arch /dev/mapper/cryptlvm
+   lvcreate -L 32G arch -n swap
+   lvcreate -L 32G arch -n root
+   lvcreate -L 100%FREE arch -n home
+   #+end_src
+
+   Форматируем
+
+   #+begin_src
+   mkfs.ext4 /dev/arch/root
+   mkfs.ext4 /dev/arch/home
+   mkswap /dev/arch/swap
+   #+end_src
+
+   И форматируем /boot
+
+   #+begin_src 
+   mkfs.fat -F32 /dev/nvme0n1p1
+   #+end_src
+
+** Зеркала и packstrap
+
+   Просто удаляем всё, что перед зеркалом яндекса в /etc/pacman.d/mirrorlist
+
+   Некоторые игры с GOG требуют 32-битные библиотеки, подключим multilib (раскомментировать в ~/etc/pacman.conf~)
+
+   #+begin_src
+   pacman -Syy
+   #+end_src
+
+   Установим сразу всё, что можно установить не из ~AUR~: в любом случае нужно будет перед чрутом установить несколько пакетов для поддержки ~LUKS~ и ~LVM~.
+
+    6  pacman -S vi
+   13  pacman -S lvm2
+   14  pacman -S cryptsetup
+   25  pacman -S iwd emacs
+   26  pacman -S  man-db man-pages texinfo
+   29  pacman -S grub efibootmgr
+   92  pacman -S sudo
+  124  pacman -S networkmanager
+  125  pacman -S dhclient bluez modemmanager
+  136  pacman -S sudo
+   67  sudo pacman -S mesa lib32-mesa xf86-video-intel
+   76  sudo pacman -S mesa xf86-video-intel
+   91  sudo pacman -S xorg-server
+  103  sudo pacman -S xf86-input-devices
+  104  sudo pacman -S xf86-input-libinput
+  109  sudo pacman -S xorg-init
+  110  sudo pacman -S xorg-xinit
+  112  sudo pacman -S firefox openconnect
+  113  sudo pacman -S firefox openconnect git
+  114  sudo pacman -S firefox openconnect rofi
+  164  sudo pacman -S kitty
+  173  sudo pacman -S rofi-pass
+  189  sudo pacman -S scrot
+  203  sudo pacman -S wget
+  225  sudo pacman -S dnsutils
+  258  sudo pacman -S qtpass
+  312  sudo pacman -S community/the_silver_searcher
+  399  sudo pacman -S python
+  405  sudo pacman -S python-pip
+  476  sudo pacman -S udisks2 udiskie
 
 ** Чрут
 
@@ -109,11 +182,114 @@ station wlan0 connect SSID
 
 ** WM
 
+** Секреты
+
+   - passwordstore
+   - ssh
+   - gnupg
+ 
 ** rofi
 
 ** Терминал
 
-** Секреты
+** Автомонтирование устройств
+** Бэкапы на отдельные диски на работе и дома
 
-** 
+   Поскольку график сейчас не очень стабильный, наверное, нельзя расчитывать на автомонтирование устройств для бэкапа.
+
+   Идея следующая: нужно использовать ~rsnapshot~ и написать скрпит:
+   - 
+
+
+   'Домашний' том:
+   /run/media/hoodoo/58b8a66d-a305-456a-9a26-ab9bfef6d95b
+   
+   'Рабочий' том:
+   /run/media/hoodoo/e542ac74-2ecf-45d7-97bd-99e0fb5f6182
+
+** Оповещения
+   
+   #+begin_src shell
+    6  pacman -S vi
+   13  pacman -S lvm2
+   14  pacman -S cryptsetup
+   24  pacman -S iwctl emacs
+   25  pacman -S iwd emacs
+   26  pacman -S  man-db man-pages texinfo
+   29  pacman -S grub efibootmgr
+   84  pacman -S sudo
+   87  pacman -S sudo
+   89  pacman -S sudo
+   92  pacman -S sudo
+  124  pacman -S networkmanager
+  125  pacman -S dhclient bluez modemmanager
+  136  pacman -S sudo
+  139  history | grep 'pacman -S'
+
+   53  sudo pacman -S xclock
+   54  sudo pacman -Ss xclock
+   55  sudo pacman -S xorg-xclock
+   63  sudo pacman -S augeas
+   67  sudo pacman -S mesa lib32-mesa xf86-video-intel
+   68  sudo pacman -S mesa xf86-video-intel
+   73  sudo pacman -S mesa xf86-video-intel
+   76  sudo pacman -S mesa xf86-video-intel
+   85  pacman -S openbox
+   86  sudo pacman -S openbox
+   88  sudo pacman -S Xorg
+   89  sudo pacman -S X11
+   90  sudo pacman -S x11
+   91  sudo pacman -S xorg-server
+  103  sudo pacman -S xf86-input-devices
+  104  sudo pacman -S xf86-input-libinput
+  108  pacman -S xorg-init
+  109  sudo pacman -S xorg-init
+  110  sudo pacman -S xorg-xinit
+  112  sudo pacman -S firefox openconnect
+  113  sudo pacman -S firefox openconnect git
+  114  sudo pacman -S firefox openconnect rofi
+  164  sudo pacman -S kitty
+  171  pacman -S rofi
+  172  sudo pacman -Ss rofi
+  173  sudo pacman -S rofi-pass
+  176  yay -S rofi-greenclip
+  177  yay -S rofi-greenclip
+  185  yay -S telegram
+  186  yay -S telegram-desktop
+  189  sudo pacman -S scrot
+  197  yay -Ss termite
+  203  sudo pacman -S wget
+  207  pacman -Ss font
+  208  pacman -Ss iosevka
+  209  yay -Ss iosevka
+  210  yay -S ttf-iosevka
+  225  sudo pacman -S dnsutils
+  258  sudo pacman -S qtpass
+  309  pacman -Ss silver
+  311  sudo packman -S community/the_silver_searcher
+  312  sudo pacman -S community/the_silver_searcher
+  394  pacman -Ss notify-send
+  395  pacman -Ss notify-send
+  399  sudo pacman -S python
+  402  sudo pacman -S pip
+  405  sudo pacman -S python-pip
+  420  yay -S deadd-notification-center
+  421  yay -S deadd-notification-center
+  422  yay -S deadd-notification-center
+  423  yay -S deadd-notification-center
+  424  yay -S deadd-notification-center-bin
+  425  yay -S picom compton-conf nitrogen berry-git
+  427  yay -S picom compton-conf nitrogen berry-git
+  430  yay -S picom nitrogen berry-git
+  431  yay -S picom nitrogen berry-git
+  434  yay -S picom nitrogen berry-git
+  438  yay -S picom nitrogen berry-git
+  444  yay -S picom nitrogen berry-git
+  447  yay -S picom nitrogen berry-git
+  460  yay -S picom nitrogen 
+  475  sudo pacman -S udisks udiskie
+  476  sudo pacman -S udisks2 udiskie
+  #+end_src
+
+pacman -S --needed base-develdf -h 
 

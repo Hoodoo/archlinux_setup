@@ -1,0 +1,16 @@
+config_version	1.2
+cmd_rsync	/usr/bin/rsync
+snapshot_root	/run/media/hoodoo/58b8a66d-a305-456a-9a26-ab9bfef6d95b/
+no_create_root	1
+
+retain	daily	10
+verbose		3
+logfile		/var/log/rsnapshot.home.log
+backup		/home/hoodoo/Org		.
+backup		/home/hoodoo/archlinux_setup	.
+backup		/home/hoodoo/puppet		.
+backup		/home/hoodoo/wallpapers		.
+backup		/home/hoodoo/.ssh		.
+backup		/home/hoodoo/.password-store	.
+backup		/home/hoodoo/.gnupg		.
+backup		/home/hoodoo/.bash_history	.
