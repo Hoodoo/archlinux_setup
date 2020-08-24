@@ -82,7 +82,7 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
    vgcreate arch /dev/mapper/cryptlvm
    lvcreate -L 32G arch -n swap
    lvcreate -L 32G arch -n root
-   lvcreate -L 100%FREE arch -n home
+   lvcreate -l 100%FREE arch -n home
    #+end_src
 
    Форматируем
@@ -122,7 +122,7 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
    Установим сразу всё, что можно установить не из ~AUR~: в любом случае нужно будет перед чрутом установить несколько пакетов для поддержки ~LUKS~ и ~LVM~.
 
    #+begin_src sh
-   pacstrap base linux linux-firmware man-db man-pages texinfo grub efibootmgr dhclient bluez modemmanager sudo networkmanager mesa xf86-video-intel xorg-server xf86-input-devices xorg-xinit xf86-input-libinput openconnect git lvm2 cryptsetup sudo emacs rofi rofi-pass maim wget dnsutils qtpass community/the_silver_searcher python python-pip udisks2 udiskie
+   pacstrap /mnt base linux linux-firmware man-db man-pages texinfo grub efibootmgr dhclient bluez modemmanager sudo networkmanager mesa xf86-video-intel xorg-server xorg-xinit xf86-input-libinput openconnect git lvm2 cryptsetup sudo emacs rofi rofi-pass maim wget dnsutils qtpass community/the_silver_searcher python python-pip udisks2 udiskie firefox ttf-dejavu ttf-liberation
    #+end_src
 
 ** Перед ~chroot~
@@ -150,7 +150,6 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
    cp configs/locale.conf /etc/locale.conf
    cp configs/hostname /etc/hostname
    cp configs/70-synaptics.conf /etc/X11/xorg.conf.d/
-   passwd
    #+end_src
 
 ** initramfs
@@ -159,6 +158,10 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
 
    #+begin_src 
    HOOKS=(base udev autodetect keyboard keymap consolefont modconf block encrypt lvm2 filesystems keyboard resume fsck) 
+   #+end_src
+
+   #+begin_src 
+   mkinticpio -P
    #+end_src
    
 ** root
@@ -180,15 +183,19 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
    CMDLINE='GRUB_CMDLINE_LINUX="resume=/dev/arch/swap cryptdevice='
    CMDLINE+=${UUID}
    CMDLINE+=':crytplvm root=/dev/arch/root"'
-   echo "${HEAD}" > prep/grub
-   echo "${CMDLINE}" >> prep/grub
-   echo "${TAIL}" >> prep/grub
+   echo "${HEAD}" > grub
+   echo "${CMDLINE}" >> grub
+   echo "${TAIL}" >> grub
    #+end_src
+
+ mv grub /etc/default
+
+grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
 
 ** crypttab
 
    #+begin_src sh
-   UUID=`blkid /dev/nvme0n1p2 | grep -ow 'UUID="[a-f0-9\-]*"' | sed 's?"??g'`; echo "cryptlvm ${UUID}" > prep/crypttab
+   UUID=`blkid /dev/nvme0n1p2 | grep -ow 'UUID="[a-f0-9\-]*"' | sed 's?"??g'`; echo "cryptlvm ${UUID}" > /etc/crypttab
    #+end_src
 
 ** юзер
@@ -196,6 +203,7 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
    #+begin_src 
    useradd -m -G wheel -s /bin/bash hoodoo
    cp configs/sudoers /etc/
+	passwd hoodoo
    #+end_src
 
 ** ~AUR~
@@ -203,12 +211,13 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
    Немного экзотики из ~AUR~
 
    #+begin_src shell
-   pacman -S --needed base-devel
-   mkdir pkgbuild
+   sudo pacman -S --needed base-devel
+   mkdir /home/hoodoo/pkgbuild
    git clone https://aur.archlinux.org/yay.git
    cd yay
    makepkg -si
-   yay -S rofi-greenclip telegram telegram-desktop termite ttf-iosevka deadd-notification-center-bin picom nitrogen mons activitywatch-bin
+   cd /root/archlinux_setup
+   yay -S rofi-greenclip termite ttf-iosevka deadd-notification-center-bin picom nitrogen mons activitywatch-bin slack-desktop
   #+end_src
 
 ** pip, gem и т.п.
@@ -225,7 +234,7 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
    git clone https://github.com/gsstark/yubiswitch-for-linux.git
    cd yubiswitch-for-linux
    gcc -g -Wall -o yubiswitch main.c
-   install -o root  -g root -m 4755  yubiswitch /usr/local/bin/
+   sudo install -o root  -g root -m 4755  yubiswitch /usr/local/bin/
    
    cd ..
 
@@ -233,6 +242,9 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
    #+end_src
 
 ** WM и прочие части окружения
+
+exit
+
 
    #+begin_src 
    cp -r configs/openbox /home/hoodoo/.config/
@@ -243,7 +255,11 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
    cp configs/sxhkdrc /home/hoodoo/.config/sxhkd/
    cp configs/termite_slash_config /home/termite/config
    mkdir /home/hoodoo/.emacs.d/
-   cp configs/init.el /home/hoodoo/emacs.d/
+   cp configs/init.el /home/hoodoo/.emacs.d/
+
+for F in `find /home/hoodoo/.config/`; do chown hoodoo ${F}; done
+chown -R hoodoo /home/hoodoo/.emacs.d/
+
    #+end_src
 
    Обоина: https://pixabay.com/users/barbaraalane-756613/
@@ -292,4 +308,22 @@ luks  Переводим в ~GPT~, создаём партиции (сектор
    #+end_src
 
 ** Оповещения
+
+TODO 
+- .xinitrc
+- разобраться с yay, убрать наверное в пост ребут
+- найти исправления
+- .XResources
+
+sxhkd &
+udiskie &
+aw-server &
+yubiswitch off &
+greenclip daemon &
+deadd-notification-center &
+emacs --daemon &
+
+xrdb -load .XResources 
+
+exec openbox-session
 

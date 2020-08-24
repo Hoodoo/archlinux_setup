@@ -21,3 +21,6 @@ control + super + l
 
 super + BackSpace
       kill -s USR1 $(pidof deadd-notification-center)
+
+super + Tab
+      rofi -show window

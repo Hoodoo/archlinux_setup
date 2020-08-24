@@ -1,0 +1,76 @@
+! Managed by emacs via SETUP.org
+
+Xcursor.size: 16
+
+! ROFI Color theme
+
+! Use extended color scheme
+rofi.color-enabled:                  true
+! Color scheme for normal row
+rofi.color-normal:                   #ffffff,#525d76,#f5f5f5,#5294e2,#ffffff
+! Color scheme for urgent row
+rofi.color-urgent:                   #ffffff,#dc322f,#f5f5f5,#5294e2,#dc322f
+! Color scheme for active row
+rofi.color-active:                   #ffffff,#c2cad0,#f5f5f5,#5294e2,#c2cad0
+! Color scheme window
+rofi.color-window:                   #ffffff,#525d76,#525d76
+! Separator style (none, dash, solid)
+rofi.separator-style:                solid
+urxvt.saveLines: 1000000
+URxvt.scrollBar: false
+URxvt.font:xft:Iosevka Nerd Font:size=10
+
+! --- special colors ---
+
+*background: #f8fafb
+*foreground: #8b8c8e
+
+! --- standard colors ---
+
+! black
+*color0: #7b7c7e
+
+! bright_black
+*color8: #8b8c8e
+
+! red
+*color1: #cca177
+
+! bright_red
+*color9: #e3ccb5
+
+! green
+*color2: #77cca1
+
+! bright_green
+*color10: #b5e3cc
+
+! yellow
+*color3: #a1cc77
+
+! bright_yellow
+*color11: #cce3b5
+
+! blue
+*color4: #a177cc
+
+! bright_blue
+*color12: #ccb5e3
+
+! magenta
+*color5: #cc77a1
+
+! bright_magenta
+*color13: #e3b5cc
+
+! cyan
+*color6: #77a1cc
+
+! bright_cyan
+*color14: #b5cce3
+
+! white
+*color7: #f8fafb
+
+! bright_white
+*color15: #f8fafb
